@@ -1,0 +1,48 @@
+﻿<#
+    .SYNOPSIS
+
+    .DESCRIPTION
+
+    .EXAMPLE
+
+    .PARAMETER
+    
+    .OUTPUTS
+
+    .NOTES
+
+    .LINK
+#>
+Function Get-LMCollectors{
+	[CmdletBinding()]
+	Param([string]
+		  [Parameter(Mandatory=$true)]
+		  $Account,
+		  [string]
+		  [Parameter(Mandatory=$false)]
+		  $AccessId = $env:LMAPIAccessId,
+		  [string]
+		  [Parameter(Mandatory=$false)]
+		  $AccessKey = $env:LMAPIAccessKey)
+	
+	begin{
+		<# request details #>
+		$httpVerb = 'GET'
+		$resourcePath = '/setting/collectors'
+		$Query = "?size=1000"
+	}
+	process{
+		try{
+			<# Make Request #>
+			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
+
+			Write-Output $output.items
+		}
+		catch{
+			Write-Error $_.Exception.Message
+		}
+		finally{}
+	}
+	end{}
+}
+
