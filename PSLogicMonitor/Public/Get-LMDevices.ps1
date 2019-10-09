@@ -4,6 +4,10 @@
     .DESCRIPTION
 
     .EXAMPLE
+		Get-LMDevices -Account "company" -GroupName "Customer/Servers/DC1"
+
+	.PARAMETER GroupName
+		The easiest place to get this is pick a device in that group and look at the devices Info tab
 
     .PARAMETER Account
 		Your LogicMonitor account (e.g. company.logicmonitor.com. company is the account)

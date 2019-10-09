@@ -1,10 +1,19 @@
 <#
     .SYNOPSIS
+		Adds a device to a device group
 
     .DESCRIPTION
+		Adds a device to a group. Retains the existing groups.
 
     .EXAMPLE
+		Set-LMDeviceGroup -Account "company" -DeviceName "device123.domain.local" -GroupId 997
 
+	.PARAMETER DeviceName
+		The Name of the device you want to add to a certain group.
+
+	.PARAMETER GroupId
+		The GroupId you want the device added to. On the Info page for the Group, system.deviceGroupId
+		
     .PARAMETER Account
 		Your LogicMonitor account (e.g. company.logicmonitor.com. company is the account)
 
@@ -57,14 +66,19 @@ Function Set-LMDeviceGroup{
 		$httpVerb = "PATCH"
         $resourcePath = "/device/devices/$DeviceId"
         $Query = "?patchFields=hostGroupIds"
-		$Data = '{"hostGroupIds":'+$ids+'}'
+		$Data = '{"hostGroupIds":"'+$ids+'"}'
 	}
 	process{
 		try{
 			<# Make Request #>
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -Data $Data -Verbose
 
-			Write-Output $output
+			if($output.hostGroupIds -eq "$ids"){
+				Write-Output $true
+			} else {
+				Write-Error "hostGroupIds $($output.hostGroupIds) does not equal $ids"
+				Write-Output $false
+			}
 		}
 		catch{
 			Write-Error $_.Exception.Message
