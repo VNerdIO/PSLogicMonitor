@@ -62,7 +62,7 @@ Function Set-LMDeviceGroup{
 	process{
 		try{
 			<# Make Request #>
-			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -Data $Data
+			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -Data $Data -Verbose
 
 			Write-Output $output
 		}
