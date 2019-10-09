@@ -5,7 +5,14 @@
 
     .EXAMPLE
 
-    .PARAMETER
+    .PARAMETER Account
+		Your LogicMonitor account (e.g. company.logicmonitor.com. company is the account)
+
+	.PARAMETER AccessId
+		Generated in LogicMonitor Settings. Only available upon generation, store it securely.
+
+	.PARAMETER AccessKey
+		Generated in LogicMonitor Settings. Store is securely.
     
     .OUTPUTS
 

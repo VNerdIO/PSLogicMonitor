@@ -1,13 +1,24 @@
 ﻿<#
     .SYNOPSIS
+		Get all LogicMonitor alerts.
 
     .DESCRIPTION
+		Get all LogicMonitor alerts. If there are >= 1000 alerts, will do a while loop to get them all.
 
     .EXAMPLE
+		$Alerts = Get-LMAlerts -Account "account"
 
-    .PARAMETER
-    
+	.PARAMETER Account
+		Your LogicMonitor account (e.g. company.logicmonitor.com. company is the account)
+
+	.PARAMETER AccessId
+		Generated in LogicMonitor Settings. Only available upon generation, store it securely.
+
+	.PARAMETER AccessKey
+		Generated in LogicMonitor Settings. Store is securely.
+		
     .OUTPUTS
+		Output an array of alerts
 
     .NOTES
 
