@@ -1,18 +1,18 @@
 <#
     .SYNOPSIS
-		Adds a device to a device group
+		Removes a device group from a device
 
     .DESCRIPTION
-		Adds a device to a group. Retains the existing groups.
+		Removes a device group from a device. Retains the remaining groups.
 
     .EXAMPLE
-		Set-LMDeviceGroup -Account "company" -DeviceName "device123.domain.local" -GroupId 997
+		Remove-LMDeviceGroup -Account "company" -DeviceName "device123.domain.local" -GroupId 997
 
 	.PARAMETER DeviceName
-		The Name of the device you want to add to a certain group.
+		The Name of the device you want to remove from a certain group.
 
 	.PARAMETER GroupId
-		The GroupId you want the device added to. On the Info page for the Group, system.deviceGroupId
+		The GroupId you want the device removed from. On the Info page for the Group, system.deviceGroupId
 		
     .PARAMETER Account
 		Your LogicMonitor account (e.g. company.logicmonitor.com. company is the account)
@@ -21,7 +21,7 @@
 		Generated in LogicMonitor Settings. Only available upon generation, store it securely.
 
 	.PARAMETER AccessKey
-		Generated in LogicMonitor Settings. Store is securely.
+		Generated in LogicMonitor Settings. Store it securely.
     
     .OUTPUTS
 
@@ -29,7 +29,7 @@
 
     .LINK
 #>
-Function Set-LMDeviceGroup{
+Function Remove-LMDeviceGroup{
 	[CmdletBinding()]
 	Param([string]
 		  [Parameter(Mandatory=$true)]
@@ -52,15 +52,20 @@ Function Set-LMDeviceGroup{
         try{
             Write-Verbose "Getting device details for $DeviceName"
             $DeviceDetails = Get-LMDeviceDetails -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName"
-			$DeviceId = $DeviceDetails.id
-			Write-Verbose "hostGroupIds for $DeviceName ($DeviceId): $($DeviceDetails.hostGroupIds)"
+            $DeviceId = $DeviceDetails.id
         }
         catch{
             Write-Error $_.Exception.Message
         }
 
+		if(!$DeviceDetails){
+			throw "No device details for $DeviceName..."
+		}
         if($DeviceDetails.hostGroupIds){
             $ids = "$($DeviceDetails.hostGroupIds),$GroupId"
+            $split = $ids -split ","
+            $NewGroups = $split | Where-Object {$_ -ne $GroupId}
+            $ids = $NewGroups -join ","
             Write-Verbose "Setting hostGroupIds to $ids, original: $($DeviceDetails.hostGroupIds) for DeviceId: $DeviceId"
         }
 
@@ -74,7 +79,9 @@ Function Set-LMDeviceGroup{
 			<# Make Request #>
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -Data $Data
 
-			if($output.hostGroupIds -eq "$ids"){
+			if( !(Compare-Object -ReferenceObject @($output.hostGroupIds) -DifferenceObject @($ids)) ){
+				# No difference, looks good
+				Write-Verbose "hostGroupIds ($output.hostGroupIds) matches $ids"
 				Write-Output $true
 			} else {
 				Write-Error "hostGroupIds $($output.hostGroupIds) does not equal $ids"

@@ -39,7 +39,7 @@ Function Get-LMDeviceDetails{
 		<# request details #>
 		$httpVerb = "GET"
 		$resourcePath = "/device/devices"
-		$Query = "?filter=name:$DeviceName"
+		$Query = "?filter=displayName:$DeviceName"
 	}
 	process{
 		try{
