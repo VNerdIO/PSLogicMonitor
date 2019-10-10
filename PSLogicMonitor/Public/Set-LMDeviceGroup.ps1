@@ -74,7 +74,7 @@ Function Set-LMDeviceGroup{
 			<# Make Request #>
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -Data $Data
 
-			if($output.hostGroupIds -eq "$ids"){
+			if( !(Compare-Object -ReferenceObject @($output.hostGroupIds) -DifferenceObject @($ids)) ){
 				Write-Output $true
 			} else {
 				Write-Error "hostGroupIds $($output.hostGroupIds) does not equal $ids"
