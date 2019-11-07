@@ -16,3 +16,9 @@ Import-Module PSLogicMonitor
 $Alerts = Get-LMAlerts -Account "COMPANY"
 ```
 
+Get all the devices under the Company/Servers folder from the root. AccessID and AccessKey are specified.
+```
+$Devices = Get-LMDevices -Account "COMPANY" -GroupName "Company/Servers" -AccessId "1234567nope" -AccessKey "nopenope"
+$Devices.Count
+60
+```
