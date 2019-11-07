@@ -24,7 +24,7 @@
 
     .LINK
 #>
-Function Get-LMDeviceSDT{
+Function Set-LMDeviceSDT{
 	[CmdletBinding()]
 	Param([string]
 		  [Parameter(Mandatory=$true)]
@@ -32,6 +32,9 @@ Function Get-LMDeviceSDT{
           [string]
 		  [Parameter(Mandatory=$true)]
 		  $DeviceName,
+          [string]
+		  [Parameter(Mandatory=$true)]
+		  $SDT,
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $AccessId = $env:LMAPIAccessId,
@@ -41,17 +44,21 @@ Function Get-LMDeviceSDT{
 	
 	begin{
         $DeviceDetails = Get-LMDeviceDetails -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName"
-        $httpVerb = 'GET'
-        $resourcePath = "/device/devices/$($DeviceDetails.id)/sdts"
+        $httpVerb = "POST"
+        $resourcePath = "/sdt/sdts"
         #$Query = "?filter=displayName:$DeviceName"
 	}
 	process{
 		try{
+            $o = $SDT | ConvertFrom-Json
+            $o.PSObject.Properties.Remove('deviceId')
+            $o | Add-Member -NotePropertyName deviceId -NotePropertyValue $DeviceDetails.Id
+            $json = $o | ConvertTo-Json
             <# Make Request #>
-            Write-Verbose "Getting SDTs..."
+            Write-Verbose "Setting SDT for $DeviceName..."
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 
-			Write-Output $output.items
+			Write-Output $output
 		}
 		catch{
 			Write-Error $_.Exception.Message

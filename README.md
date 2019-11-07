@@ -1,5 +1,9 @@
 ﻿# PSLogicMonitor
 
+## Reference
+
+Modules based on [LogicMonitor REST API v2](https://www.logicmonitor.com/support/rest-api-developers-guide/v2/)
+
 ## Requirements
 
 - An active LogicMonitor account
