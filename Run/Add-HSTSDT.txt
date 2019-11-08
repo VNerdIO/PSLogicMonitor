@@ -1,0 +1,83 @@
+####
+# Use PSLogicMonitor Powershell module (https://bitbucket.org/cspire_devops/pslogicmonitor/src/master/) to 
+# create SDTs for Windows services across multiple devices rather than adding them inidividually.
+####
+
+Import-Module ".\Code\PowershellModules\PSLogicMonitor\PSLogicMonitor.psm1"
+
+$hst = Get-LMDevices -Account "cspire" -GroupName "HST Pathways/Servers"
+
+foreach($Device IN $hst){
+	# Get device details, really just the Id
+	$Details = Get-LMDeviceDetails -Account "cspire" -DeviceName "$($Device.displayName)"
+	# Get SDT details for the device
+	$sdt = Get-LMDeviceSDT -Account "cspire" -DeviceName "$($Device.displayName)"
+	$WindowsDevice = $Details.systemProperties | Where-Object {$_.value -like "*Windows*" -AND $_.name -ne "system.collectorplatform"}
+	$Comment = "Added by PSLogicMonitor module --mosmith"
+
+	# Only sweat it if it's a Windows boxen
+	if($WindowsDevice){
+		# Get Automatic_Services datasource instance, then the Id for the service (if it exists)
+		$Datasources = Get-LMDatasources -Account "cspire" -DeviceName "$($Device.displayName)"
+		$AutomaticServices = $Datasources | Where-Object {$_.dataSourceName -eq "Automatic_Services-"}
+		$Instances = Get-LMDatasourceInstances -Account "cspire" -DeviceName "$($Device.displayName)" -DatasourceId $AutomaticServices.Id
+
+		$VMwareToolsId = $Instances | Where-Object {$_.displayName -eq "VMware Tools"}
+		$HL7Id = $Instances | Where-Object {$_.displayName -eq "HST HL7 Communicator Service"}
+		$HSTId = $Instances | Where-Object {$_.displayName -eq "HSTTransmitter Service"}
+
+		# If it doesn't already have an SDT for "HST HL7 Communicator Service" add one if the service is installed
+		if(-NOT ($sdt | Where-Object {$_.dataSourceInstanceName -eq "HST HL7 Communicator Service"}) -AND $HL7Id){
+			$Service1 = "{'sdtType':4,'type':'DeviceDataSourceInstanceSDT','deviceId':$($Device.Id),'dataSourceInstanceId':$($HL7Id.Id),'comment':'$Comment','hour':0,'endHour':9,'minute':0,'endMinute':0}"
+
+			Write-Output "Adding SDT for 'HST HL7 Communicator Service' on $($Device.displayName)"
+			Set-LMDeviceSDT -Account "cspire" -DeviceName $Device.displayName -SDT $Service1
+		} else {
+			Write-Output "Skipping SDT for 'HST HL7 Communicator Service' on $($Device.displayName)"
+		}
+		
+		# If it doesn't already have an SDT for "HSTTransmitter Service" add one if the service is installed
+		if(-NOT ($sdt | Where-Object {$_.dataSourceInstanceName -eq "HSTTransmitter Service"}) -AND $HSTId){
+			$Service2 = "{'sdtType':4,'type':'DeviceDataSourceInstanceSDT','deviceId':$($Device.Id),'dataSourceInstanceId':$($HSTId.Id),'comment':'$Comment','hour':0,'endHour':9,'minute':0,'endMinute':0}"
+			
+			Write-Output "Adding SDT for 'HSTTransmitter Service' on $($Device.displayName)"
+			Set-LMDeviceSDT -Account "cspire" -DeviceName $Device.displayName -SDT $Service2
+		} else {
+			Write-Output "Skipping SDT for 'HSTTransmitter Service' on $($Device.displayName)"
+		}
+		
+		# If it doesn't already have an SDT for "VMware Tools" add one if the service is installed
+		if(-NOT ($sdt | Where-Object {$_.dataSourceInstanceName -eq "VMware Tools"}) -AND $VMwareToolsId){
+			$Service3 = "{'sdtType':4,'type':'DeviceDataSourceInstanceSDT','deviceId':$($Device.Id),'dataSourceInstanceId':$($VMwareToolsId.Id),'comment':'$Comment','hour':0,'endHour':9,'minute':0,'endMinute':0}"
+			
+			Write-Output "Adding SDT for 'VMware Tools' on $($Device.displayName)"
+			Set-LMDeviceSDT -Account "cspire" -DeviceName $Device.displayName -SDT $Service3
+		} else {
+			Write-Output "Skipping SDT for 'VMware Tools' on $($Device.displayName)"
+		}
+	}
+}
+
+#### 
+# Output
+####
+
+# Adding SDT for 'HST HL7 Communicator Service' on HSTVSQL1
+# Adding SDT for 'HSTTransmitter Service' on HSTVSQL1
+# Skipping SDT for 'VMware Tools' on HSTVSQL1
+# Adding SDT for 'HST HL7 Communicator Service' on HSTVSQL7
+# Adding SDT for 'HSTTransmitter Service' on HSTVSQL7
+# Skipping SDT for 'VMware Tools' on HSTVSQL7
+# Skipping SDT for 'HST HL7 Communicator Service' on HSTVSQL16
+# Skipping SDT for 'HSTTransmitter Service' on HSTVSQL16
+# Skipping SDT for 'VMware Tools' on HSTVSQL16
+# Skipping SDT for 'HST HL7 Communicator Service' on HSTVIFC01
+# Skipping SDT for 'HSTTransmitter Service' on HSTVIFC01
+# Skipping SDT for 'VMware Tools' on HSTVIFC01
+# Skipping SDT for 'HST HL7 Communicator Service' on HSTVSQL13
+# Skipping SDT for 'HSTTransmitter Service' on HSTVSQL13
+# Skipping SDT for 'VMware Tools' on HSTVSQL13
+# Skipping SDT for 'HST HL7 Communicator Service' on HSTASP15
+# Skipping SDT for 'HSTTransmitter Service' on HSTASP15
+# Skipping SDT for 'VMware Tools' on HSTASP15
+# ...

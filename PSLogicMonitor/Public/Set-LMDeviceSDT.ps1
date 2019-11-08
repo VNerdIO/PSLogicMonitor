@@ -50,13 +50,15 @@ Function Set-LMDeviceSDT{
 	}
 	process{
 		try{
+			# Assuming the json has the deviceId element. Remove it and replace it with the DeviceName deviceId, convert back to json
             $o = $SDT | ConvertFrom-Json
             $o.PSObject.Properties.Remove('deviceId')
             $o | Add-Member -NotePropertyName deviceId -NotePropertyValue $DeviceDetails.Id
             $json = $o | ConvertTo-Json
+
             <# Make Request #>
             Write-Verbose "Setting SDT for $DeviceName..."
-			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
+			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Data "$json"
 
 			Write-Output $output
 		}
