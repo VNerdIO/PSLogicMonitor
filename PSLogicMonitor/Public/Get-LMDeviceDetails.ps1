@@ -44,6 +44,7 @@ Function Get-LMDeviceDetails{
 	process{
 		try{
 			<# Make Request #>
+			Write-Verbose "$($MyInvocation.MyCommand) - $httpVerb $resourcePath$($Query)"
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 
 			Write-Output $output.items

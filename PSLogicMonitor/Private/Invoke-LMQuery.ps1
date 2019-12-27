@@ -92,7 +92,7 @@ Function Invoke-LMQuery{
 			}
 
 			<# Print status and body of response #>
-			$body = $response.data | ConvertTo-Json -Depth 5
+			$body = $response.data | ConvertTo-Json -Depth 10
 
 			Write-Output (ConvertFrom-Json $body)
 		}

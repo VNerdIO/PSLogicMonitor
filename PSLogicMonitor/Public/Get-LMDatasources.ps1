@@ -49,6 +49,7 @@ Function Get-LMDatasources{
 	process{
 		try{
 			<# Make Request #>
+			Write-Verbose "$($MyInvocation.MyCommand) - $httpVerb $resourcePath$($Query)"
 			$bucket = @()
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 			$bucket += $output.items

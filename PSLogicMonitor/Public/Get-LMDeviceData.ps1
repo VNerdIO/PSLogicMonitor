@@ -39,15 +39,12 @@ Function Get-LMDeviceData{
 		  $Datasource,
           [string]
 		  [Parameter(Mandatory=$true)]
-		  $Datapoint,
-          [string]
-		  [Parameter(Mandatory=$true)]
 		  $Start,
           [string]
 		  [Parameter(Mandatory=$true)]
 		  $End,
           [string]
-		  [Parameter(Mandatory=$true)]
+		  [Parameter(Mandatory=$false)]
 		  $Datapoints)
 	
 	begin{
@@ -70,19 +67,20 @@ Function Get-LMDeviceData{
             Write-Error $_.Exception.Message
         }
 
-        $Device = Get-LMDeviceDetails -Account $Account -AccessId $AccessId -AccessKey $AccessKey -DeviceName $DeviceName
-        $DeviceId = $Device.AccessId
+        $Device = Get-LMDeviceDetails -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName"
+        $DeviceDatasource = Get-LMDatasources -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName" | Where-Object dataSourceDisplayName -eq "$Datasource"
 
 		$httpVerb = 'GET'
-		$resourcePath = "/device/devices/$DeviceId/devicedatasources/{deviceDatasourceId}/data"
-		$Query = "?start=$StartUnixTime&end=$EndUnixTime"
+		$resourcePath = "/device/devices/$($Device.Id)/devicedatasources/$($DeviceDatasource.Id)/data"
+		$Query = "?start=$StartUnixTime&end=$EndUnixTime&datapoints=$Datapoints"
 	}
 	process{
 		try{
 			<# Make Request #>
+            Write-Verbose "$($MyInvocation.MyCommand) - $httpVerb $resourcePath$($Query)"
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 
-			Write-Output $output.items
+			Write-Output $output
 		}
 		catch{
 			Write-Error $_.Exception.Message
