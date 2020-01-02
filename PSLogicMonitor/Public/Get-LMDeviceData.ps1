@@ -49,8 +49,9 @@ Function Get-LMDeviceData{
 	
 	begin{
 		<# request details #>
+		$date1 = Get-Date -Date "01/01/1970"
+
         try{
-            $date1 = Get-Date -Date "01/01/1970"
             $date2 = Get-Date($Start)
             $StartUnixTime = (New-TimeSpan -Start $date1 -End $date2).TotalSeconds
         }
@@ -59,13 +60,16 @@ Function Get-LMDeviceData{
         }
 
         try{
-            $date1 = Get-Date -Date "01/01/1970"
             $date2 = Get-Date($End)
             $EndUnixTime = (New-TimeSpan -Start $date1 -End $date2).TotalSeconds
         }
         catch{
             Write-Error $_.Exception.Message
         }
+
+		# 500 sample limit gets about 16 hours of data
+		$Hours = 16
+		$Iterations = [math]::round((New-TimeSpan -Start $Start -End $End).TotalHours/$Hours)
 
         $Device = Get-LMDeviceDetails -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName"
         $DeviceDatasource = Get-LMDatasources -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName" | Where-Object dataSourceDisplayName -eq "$Datasource"
@@ -77,8 +81,24 @@ Function Get-LMDeviceData{
 	process{
 		try{
 			<# Make Request #>
-            Write-Verbose "$($MyInvocation.MyCommand) - $httpVerb $resourcePath$($Query)"
-			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
+			if($Iterations -lt 2){
+            	Write-Verbose "$($MyInvocation.MyCommand) - $httpVerb $resourcePath$($Query)"
+				$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
+			} else {
+				$output = @()
+				for($i=0;$i -le $Iterations;$i++){
+					Write-Verbose "$($MyInvocation.MyCommand) - $httpVerb $resourcePath$($Query) - #$i"
+					if($i -eq 0){ 
+						$NewStart = $Start 
+					}
+					$NewEnd = Get-Date(Get-Date($NewStart)).AddHours($Hours)
+
+					$NewStartUnixTime = (New-TimeSpan -Start $date1 -End $NewStart).TotalSeconds
+					$NewEndUnixTime = (New-TimeSpan -Start $date1 -End $NewEnd).TotalSeconds
+					$Query = "?start=$NewStartUnixTime&end=$NewEndUnixTime&datapoints=$Datapoints"
+					$output += Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
+				}
+			}
 
 			Write-Output $output
 		}
