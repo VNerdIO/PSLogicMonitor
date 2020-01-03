@@ -42,6 +42,9 @@ Function Invoke-LMQuery{
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $Data,
+		  [switch]
+		  [Parameter(Mandatory=$false)]
+		  $Stream,
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $AccessId = $env:LMAPIAccessId,
@@ -88,13 +91,16 @@ Function Invoke-LMQuery{
 				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -Body $Data -ContentType "application/json"
 			} else {
 				Write-Verbose "Url: $url, Method: $Verb, Header: $headers"
-				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers
+				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -ContentType "application/json"
 			}
 
 			<# Print status and body of response #>
-			$body = $response.data | ConvertTo-Json -Depth 10
-
-			Write-Output (ConvertFrom-Json $body)
+			if($Stream){
+				Write-Output $response
+			} else {
+				$body = $response.data | ConvertTo-Json -Depth 10
+				Write-Output (ConvertFrom-Json $body)
+			}
 		}
 		catch{
 			Write-Error $_.Exception.Message
