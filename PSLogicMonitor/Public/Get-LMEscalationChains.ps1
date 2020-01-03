@@ -38,7 +38,11 @@ Function Get-LMEscalationChains{
 	begin{
 		<# request details #>
 		$httpVerb = 'GET'
-		$resourcePath = '/setting/alert/chains'
+        if([int]$EscalationChainId){
+            $resourcePath = "/setting/alert/chains/$EscalationChainId"
+        } else {
+		    $resourcePath = '/setting/alert/chains'
+        }
 		$Query = "?size=1000"
 	}
 	process{
@@ -46,7 +50,11 @@ Function Get-LMEscalationChains{
 			<# Make Request #>
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 
-			Write-Output $output.items
+            if([int]$EscalationChainId){
+                Write-Output $output
+            } else {
+                Write-Output $output.items
+            }
 		}
 		catch{
 			Write-Error $_.Exception.Message
