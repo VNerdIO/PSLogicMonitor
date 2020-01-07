@@ -92,6 +92,7 @@ Function Invoke-LMQuery{
 			} else {
 				Write-Verbose "Url: $url, Method: $Verb, Header: $headers"
 				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -ContentType "application/json"
+				#$response = Invoke-WebRequest  -Uri $url -Method $Verb -Header $headers -ContentType "application/binary"
 			}
 
 			<# Print status and body of response #>

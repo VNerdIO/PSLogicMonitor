@@ -22,7 +22,8 @@
 
     .NOTES
 
-    .LINK
+	.LINK
+	https://www.logicmonitor.com/support/rest-api-developers-guide/v1/alerts/get-alerts/
 #>
 Function Get-LMAlerts{
 	[CmdletBinding()]
@@ -34,13 +35,31 @@ Function Get-LMAlerts{
 		  $AccessId = $env:LMAPIAccessId,
 		  [string]
 		  [Parameter(Mandatory=$false)]
-		  $AccessKey = $env:LMAPIAccessKey)
+		  $AccessKey = $env:LMAPIAccessKey,
+		  [switch]
+		  [Parameter(Mandatory=$false)]
+		  $AlertDetails,
+		  [string]
+		  [Parameter(Mandatory=$false)]
+		  [ValidateSet("Warning","Error","Critical")]
+		  $Severity)
 	
 	begin{
 		<# request details #>
 		$httpVerb = 'GET'
 		$resourcePath = '/alert/alerts'
-		$Query = "?size=1000"
+		if($AlertDetails){
+			$Query = "?size=1000&needMessage=true"
+		} else {
+			$Query = "?size=1000"
+		}
+
+		switch($Severity){
+			"Warning"{ $Sev = 2 }
+			"Error"{ $Sev = 3 }
+			"Critical"{ $Sev = 4 }
+			Default{ }
+		}
 	}
 	process{
 		try{
@@ -53,12 +72,20 @@ Function Get-LMAlerts{
 				$i++
 				$offset = $i * 1000
 				Write-Verbose $offset
-				$Query = "?size=1000&offset=$offset"
+				if($AlertDetails){
+					$Query = "?size=1000&needMessage=true&offset=$offset"
+				} else {
+					$Query = "?size=1000&offset=$offset"
+				}
 				$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 				$bucket += $output.items
 			}
 
-			Write-Output $bucket
+			If($Sev){
+				Write-Output $bucket | Where-Object severity -eq $Sev
+			} else {
+				Write-Output $bucket
+			}
 		}
 		catch{
 			Write-Error $_.Exception.Message
