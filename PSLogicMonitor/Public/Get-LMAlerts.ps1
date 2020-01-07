@@ -45,21 +45,22 @@ Function Get-LMAlerts{
 		  $Severity)
 	
 	begin{
+		switch($Severity){
+			"Warning"{ $Sev = "&filter=severity:2" }
+			"Error"{ $Sev = "&filter=severity:3" }
+			"Critical"{ $Sev = "&filter=severity:4" }
+			Default{ $Sev = "" }
+		}
+
 		<# request details #>
 		$httpVerb = 'GET'
 		$resourcePath = '/alert/alerts'
 		if($AlertDetails){
-			$Query = "?size=1000&needMessage=true"
+			$Query = "?size=1000$Sev&needMessage=true"
 		} else {
-			$Query = "?size=1000"
+			$Query = "?size=1000$Sev"
 		}
 
-		switch($Severity){
-			"Warning"{ $Sev = 2 }
-			"Error"{ $Sev = 3 }
-			"Critical"{ $Sev = 4 }
-			Default{ }
-		}
 	}
 	process{
 		try{
@@ -73,19 +74,15 @@ Function Get-LMAlerts{
 				$offset = $i * 1000
 				Write-Verbose $offset
 				if($AlertDetails){
-					$Query = "?size=1000&needMessage=true&offset=$offset"
+					$Query = "?size=1000$Sev&needMessage=true&offset=$offset"
 				} else {
-					$Query = "?size=1000&offset=$offset"
+					$Query = "?size=1000$Sev&offset=$offset"
 				}
 				$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 				$bucket += $output.items
 			}
 
-			If($Sev){
-				Write-Output $bucket | Where-Object severity -eq $Sev
-			} else {
 				Write-Output $bucket
-			}
 		}
 		catch{
 			Write-Error $_.Exception.Message
