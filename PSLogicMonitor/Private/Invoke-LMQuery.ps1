@@ -42,9 +42,13 @@ Function Invoke-LMQuery{
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $Data,
-		  [switch]
+		  [string]
 		  [Parameter(Mandatory=$false)]
-		  $Stream,
+		  $File,
+		  [string]
+		  [Parameter(Mandatory=$false)]
+		  [ValidateSet("application/json","application/binary")]
+		  $ContentType = "application/json",
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $AccessId = $env:LMAPIAccessId,
@@ -88,20 +92,15 @@ Function Invoke-LMQuery{
 			<# Make Request #>
 			if($Data){
 				Write-Verbose "Url: $url, Method: $Verb, Header: $headers, Body: $Data"
-				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -Body $Data -ContentType "application/json"
+				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -Body $Data -ContentType $ContentType -Outfile $File
 			} else {
 				Write-Verbose "Url: $url, Method: $Verb, Header: $headers"
-				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -ContentType "application/json"
-				#$response = Invoke-WebRequest  -Uri $url -Method $Verb -Header $headers -ContentType "application/binary"
+				$response = Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -ContentType $ContentType -Outfile $File
 			}
 
 			<# Print status and body of response #>
-			if($Stream){
-				Write-Output $response
-			} else {
-				$body = $response.data | ConvertTo-Json -Depth 10
-				Write-Output (ConvertFrom-Json $body)
-			}
+			$body = $response.data | ConvertTo-Json -Depth 10
+			Write-Output (ConvertFrom-Json $body)
 		}
 		catch{
 			Write-Error $_.Exception.Message

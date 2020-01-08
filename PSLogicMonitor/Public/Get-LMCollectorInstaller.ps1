@@ -36,6 +36,9 @@ Function Get-LMCollectorInstaller{
 		  [Parameter(Mandatory=$true)]
           [ValidateSet("Win32","Win64","Linux32","Linux64")]
 		  $Platform,
+          [string]
+		  [Parameter(Mandatory=$true)]
+		  $File,
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $AccessId = $env:LMAPIAccessId,
@@ -52,7 +55,7 @@ Function Get-LMCollectorInstaller{
 	process{
 		try{
 			<# Make Request #>
-			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -Stream
+			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query" -File $File -ContentType "application/binary"
 
             Write-Output $output
 		}
