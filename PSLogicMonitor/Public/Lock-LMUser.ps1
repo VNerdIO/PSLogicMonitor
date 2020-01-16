@@ -47,6 +47,7 @@ Function Lock-LMUser{
 			$Roles = $User.roles | Select-Object name
 			$RolesJson = $Roles | ConvertTo-Json -Compress
 			$Data = $User | Select-Object username,contactMethod,firstName,lastName,phone,smsEmail,note,smsEmailFormat,forcePasswordChange,viewPermission,acceptEULA,twoFAEnabled,email,@{n="roles";e={$RolesJson}},@{n="status";e={"suspended"}} | ConvertTo-Json -Compress
+			# Dumb fix for the way LM API expects to see the roles
 			$Data = ($Data -replace '"{','[{') -replace '}"','}]'
 			$Data = $Data -replace "\\"
 
