@@ -102,11 +102,17 @@ Function Invoke-LMQuery{
 
 			<# Print status and body of response #>
 			if($response.data){
+				Write-Verbose "response.data results"
 				$body = $response.data | ConvertTo-Json -Depth 10
-			} else {
+				Write-Output (ConvertFrom-Json $body)
+			} elseif($response) {
+				Write-Verbose "response results"
 				$body = $response | ConvertTo-Json -Depth 10
+				Write-Output (ConvertFrom-Json $body)
+			} else {
+				Write-Verbose "no news is good news? results"
+				Write-Output $true
 			}
-			Write-Output (ConvertFrom-Json $body)
 		}
 		catch{
 			Write-Error $_.Exception.Message
