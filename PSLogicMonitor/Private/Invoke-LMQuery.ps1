@@ -93,15 +93,19 @@ Function Invoke-LMQuery{
 			if($Data){
 				Write-Verbose "Url: $url, Method: $Verb, Header: $headers, Body: $Data"
 				Write-Verbose "Running... Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -Body $Data -ContentType $ContentType -Outfile $File"
-				$response = Invoke-RestMethod -Uri "$url" -Method "$Verb" -Header "$headers" -Body $Data -ContentType "$ContentType" -Outfile "$File"
+				$response = Invoke-RestMethod -Uri "$url" -Method "$Verb" -Header $headers -Body $Data -ContentType "$ContentType" -Outfile "$File"
 			} else {
 				Write-Verbose "Url: $url, Method: $Verb, Header: $headers"
 				Write-Verbose "Running... Invoke-RestMethod -Uri $url -Method $Verb -Header $headers -ContentType $ContentType -Outfile $File"
-				$response = Invoke-RestMethod -Uri "$url" -Method "$Verb" -Header "$headers" -ContentType "$ContentType" -Outfile "$File"
+				$response = Invoke-RestMethod -Uri "$url" -Method "$Verb" -Header $headers -ContentType "$ContentType" -Outfile "$File"
 			}
 
 			<# Print status and body of response #>
-			$body = $response.data | ConvertTo-Json -Depth 10
+			if($response.data){
+				$body = $response.data | ConvertTo-Json -Depth 10
+			} else {
+				$body = $response | ConvertTo-Json -Depth 10
+			}
 			Write-Output (ConvertFrom-Json $body)
 		}
 		catch{
