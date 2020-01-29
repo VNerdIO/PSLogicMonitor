@@ -1,21 +1,18 @@
-# Delete the script
-Remove-Item -Path $MyInvocation.MyCommand.Source
-
-Start-Transcript "$PSScriptRoot\Install-LM.log"
 <# 
 	Some setup
 #>
 $WorkFolder = "PsLm"+(New-Guid).Guid.substring(31,5)
 $ThisHost = hostname
-$PSScriptRoot
+$Root = (Get-Location).Path
 $DownloadPSLM = "https://github.com/VNerdIO/PSLogicMonitor/archive/master.zip"
-$Destination = "$PSScriptRoot\$WorkFolder\PSLogicMonitor.zip"
-$ExtractTo = "$PSScriptRoot\$WorkFolder"
-$CreateDir = New-Item -ItemType Directory -Path "$PSScriptRoot\$WorkFolder"
+$Destination = "$Root\$WorkFolder\PSLogicMonitor.zip"
+$ExtractTo = "$Root\$WorkFolder"
+$CreateDir = New-Item -ItemType Directory -Path "$Root\$WorkFolder"
 $AccessId = "ET3cJkn5AJK6W3W26L28"
 $AccessKey = "+kkQ68p8P~U8uu(Hu+U)5PIUy(yK3d5q2fKc8DD{"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+Start-Transcript "$Root\Install-LM.log"
 <# 
 	Get PSLogicMonitor module
 #>

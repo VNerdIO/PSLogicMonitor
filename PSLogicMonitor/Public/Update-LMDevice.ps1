@@ -57,7 +57,11 @@ Function Update-LMDevice{
 			<# Make Request #>
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Data "$DataJson" -Query "$Query"
 
-			Write-Output $output
+			if($output.errmsg){
+				Write-Output $false
+			} else {
+				Write-Output $output
+			}
 		}
 		catch{
 			Write-Error $_.Exception.Message
