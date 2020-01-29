@@ -11,6 +11,9 @@ $CreateDir = New-Item -ItemType Directory -Path "$Root\$WorkFolder"
 $AccessId = "ET3cJkn5AJK6W3W26L28"
 $AccessKey = "+kkQ68p8P~U8uu(Hu+U)5PIUy(yK3d5q2fKc8DD{"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+if($CollectorDescription -eq ""){
+	$CollectorDescription = $ThisHost
+}
 
 Start-Transcript "$Root\Install-LM.log"
 <# 
@@ -43,9 +46,17 @@ Write-Output "[$(Get-Date -Format s)] PSLogicMonitor Extraction complete"
 #>
 Import-Module "$ExtractTo\PSLogicMonitor-master\PSLogicMonitor\PSLogicMonitor.psm1"
 
+<#
+	Grant the user LogonAsServiceRights
+#>
+if($ServiceUserName -ne "Local System"){
+	Write-Output "[$(Get-Date -Format s)] Granting $ServiceUserName LogonAsService rights."
+	Grant-LogonAsService -accountToAdd $ServiceUserName
+}
+
 Write-Output "[$(Get-Date -Format s)] Creating Collector"
 try{
-	$Collector = New-LMCollector -Account "cspire" -AccessId "$AccessId" -AccessKey "$AccessKey" -Description "$ThisHost" -CollectorGroupId 8
+	$Collector = New-LMCollector -Account "cspire" -AccessId "$AccessId" -AccessKey "$AccessKey" -Description "$CollectorDescription" -CollectorGroupId 8
 	Write-Output "[$(Get-Date -Format s)] Created Collector $($Collector.Id)"
 }
 catch{
@@ -119,6 +130,7 @@ Write-Output "[$(Get-Date -Format s)] Cleaning up the self monitored collector n
 $Fields = @{}
 $Fields.Add("name",$ThisHost)
 $Fields.Add("displayName",$ThisHost)
+$Fields.Add("description",$CollectorDescription)
 $CollectorDevice = Get-LMCollectorDevices -Account "cspire" -CollectorId $Collector.Id
 if($Update = Update-LMDevice -Account "cspire" -DeviceId $CollectorDevice.id -Fields $Fields -Verbose){
 	Write-Output "[$(Get-Date -Format s)] Name/displayName updated."
