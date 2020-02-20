@@ -25,8 +25,9 @@ $PurgeCustomers = $Users | Where-Object {$_.email -notlike "*@cspire.com" -AND $
 # Purge users first, so users are not disabled/purged immediately
 foreach($PurgeCSUser IN $PurgeCSUsers){
 	try{
-		#$Lock = Lock-LMUser -Account "cspire" -UserId $PurgeCSUser.id
-		Write-Output "$($Lock.username) was deleted."
+		#$Lock = Remove-LMUser -Account "cspire" -UserId $PurgeCSUser.id
+		Write-Output "$($PurgeCSUser.username) was deleted."
+		$ReportPurge += $Lock
 	}
 	catch{
 		Write-Error "ERROR: $($PurgeCSUser.username) was NOT deleted ($($_.Exception.Message))."
@@ -35,8 +36,9 @@ foreach($PurgeCSUser IN $PurgeCSUsers){
 
 foreach($PurgeCustomer IN $PurgeCustomers){
 	try{
-		#$Lock = Lock-LMUser -Account "cspire" -UserId $PurgeCustomer.id
-		Write-Output "$($Lock.username) was ddeleted. $($PurgeCustomer.username)"
+		#$Lock = Remove-LMUser -Account "cspire" -UserId $PurgeCustomer.id
+		Write-Output "$($PurgeCustomer.username) was deleted."
+		$ReportPurge += $Lock
 	}
 	catch{
 		Write-Error "ERROR: $($PurgeCustomer.username) was NOT deleted ($($_.Exception.Message))."
@@ -47,7 +49,7 @@ foreach($PurgeCustomer IN $PurgeCustomers){
 foreach($InactiveCSUser IN $InactiveCSUsers){
 	try{
 		#$Lock = Lock-LMUser -Account "cspire" -UserId $InactiveCSUser.id
-		Write-Output "$($Lock.username) was suspended. $($InactiveCSUser.username)"
+		Write-Output "$($InactiveCSUser.username) was suspended."
 		$ReportSuspend += $Lock
 	}
 	catch{
@@ -58,7 +60,7 @@ foreach($InactiveCSUser IN $InactiveCSUsers){
 foreach($InactiveCustomer IN $InactiveCustomers){
 	try{
 		#$Lock = Lock-LMUser -Account "cspire" -UserId $InactiveCustomer.id
-		Write-Output "$($Lock.username) was suspended. $($InactiveCustomer.username)"
+		Write-Output "$($InactiveCustomer.username) was suspended."
 		$ReportSuspend += $Lock
 	}
 	catch{
