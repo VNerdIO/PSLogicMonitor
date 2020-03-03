@@ -19,13 +19,12 @@
     .NOTES
 
     .LINK
-		https://www.logicmonitor.com/support/rest-api-developers-guide/v1/device-groups/get-device-groups/
 #>
-Function Get-LMDeviceGroups{
+Function Get-LMAlertRules{
 	[CmdletBinding()]
 	Param([string]
 		  [Parameter(Mandatory=$true)]
-          $Account,
+		  $Account,
 		  [string]
 		  [Parameter(Mandatory=$false)]
 		  $AccessId = $env:LMAPIAccessId,
@@ -34,28 +33,31 @@ Function Get-LMDeviceGroups{
 		  $AccessKey = $env:LMAPIAccessKey)
 	
 	begin{
-        <# request details #>
+		<# request details #>
 		$httpVerb = "GET"
-		$resourcePath = "/device/groups"
+		$resourcePath = "/setting/alert/rules"
 		$Query = "?size=1000"
 	}
 	process{
 		try{
 			<# Make Request #>
-			$bucket = @()
+            $bucket = @()
 			$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
-			$bucket += $output.items
+            $bucket += $output.items
             $i = 0
 
 			while($output.items.count -eq 1000){
 				$i++
 				$offset = $i * 1000
                 Write-Verbose "Getting 1k more ($offset)"
-                $Query = "?size=1000&offset=$offset"
+                if($groupId){
+                    $Query = "?size=1000&offset=$offset&filter=hostGroupIds~*$groupId*"
+                } else {
+                    $Query = "?size=1000&offset=$offset"
+                }
 
 				$output = Invoke-LMQuery -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -Verb "$httpVerb" -Path "$resourcePath" -Query "$Query"
 				$bucket += $output.items
-				Write-Verbose "Bucket Count: $($bucket.count)"
 			}
 
 			Write-Output $bucket
