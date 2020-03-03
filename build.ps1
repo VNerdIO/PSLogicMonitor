@@ -19,7 +19,7 @@ function Analyze-Scripts
     param(
         [string]$Path = "$PSScriptRoot"
     )
-    $result = Invoke-ScriptAnalyzer -Path $Path -Severity @('Error', 'Warning') -Recurse
+    $result = Invoke-ScriptAnalyzer -Path $Path -Severity @('Error') -Recurse
     if ($result) {
        $result | Format-Table  
        Write-Error -Message "$($result.SuggestedCorrections.Count) linting errors or warnings were found. The build cannot continue."
