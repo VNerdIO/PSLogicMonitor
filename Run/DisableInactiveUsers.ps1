@@ -1,12 +1,12 @@
 <#
 	Find inactive users
-	"inactive" - a status=active user that hasn't logged in 30 days
+	"inactive" - a status=active user that hasn't logged in # days
 #>
 
 [datetime]$origin = "1970-01-01 00:00:00"
 $today = Get-Date
 $Users = Get-LMUsers -Account "cspire"
-$ExcludeUsernames = "apiuser"
+$ExcludeUsernames = "apiuser","brightguage","arkis","support@logicmonitor.com"
 [int]$DisableDays = 30
 [int]$PurgeDays = 90
 [int]$CustomerDisableDays = 180
