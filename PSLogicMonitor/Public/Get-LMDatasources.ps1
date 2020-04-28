@@ -30,7 +30,7 @@ Function Get-LMDatasources{
 		  [Parameter(Mandatory=$true)]
 		  $Account,
           [string]
-		  [Parameter(Mandatory=$true)]
+		  [Parameter(Mandatory=$false)]
 		  $DeviceName,
 		  [string]
 		  [Parameter(Mandatory=$false)]
@@ -41,9 +41,13 @@ Function Get-LMDatasources{
 	
 	begin{
 		<# request details #>
-        $DeviceDetails = Get-LMDeviceDetails -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName"
 		$httpVerb = "GET"
-		$resourcePath = "/device/devices/$($DeviceDetails.id)/devicedatasources"
+		if($DeviceName){
+			$DeviceDetails = Get-LMDeviceDetails -Account "$Account" -AccessId "$AccessId" -AccessKey "$AccessKey" -DeviceName "$DeviceName"
+			$resourcePath = "/device/devices/$($DeviceDetails.id)/devicedatasources"
+		} else {
+			$resourcePath = "/setting/datasources"
+		}
 		$Query = "?size=50"
 	}
 	process{
